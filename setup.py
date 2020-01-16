@@ -11,7 +11,7 @@ try:
 except Exception:
     pass
 
-version = '2.0'
+version = '2.1'
 
 f = open('README.rst')
 long_description = f.read().split('split here')[1]
@@ -27,33 +27,37 @@ elif sys.version_info[0] == 2:
 
 tests_require = ['nose']
 
+
 class build_py(_build_py):
-  def run(self):
-    _build_py.run(self)
-    if platform.system() == 'Windows':
-      import os
-      try:
-        import winbuild
-      except:
-        self.announce("Could not find an microsoft compiler for supporting windows process injection", 2)
-        return
-      #can fail ?
-      dirs = [x for x in self.get_data_files() if x[0] == 'pyrasite'][0]
-      srcfile = os.path.join(dirs[1], 'win', 'inject_python.cpp')
-      out32exe = os.path.join(dirs[2], 'win', 'inject_python_32.exe')
-      out64exe = os.path.join(dirs[2], 'win', 'inject_python_64.exe')
-      try:
-        os.makedirs(os.path.dirname(out32exe))
-      except:
-        pass
-      try:
-        winbuild.compile(srcfile, out32exe, 'x86')
-      except:
-        self.announce("Could not find an x86 microsoft compiler for supporting injection to 32 bit python instances", 2)
-      try:
-        winbuild.compile(srcfile, out64exe, 'x64')
-      except:
-        self.announce("Could not find an x64 microsoft compiler for supporting injection to 64 bit python instances", 2)
+    def run(self):
+        _build_py.run(self)
+        if platform.system() == 'Windows':
+            import os
+            try:
+                import winbuild
+            except:
+                self.announce(
+                    "Could not find an microsoft compiler for supporting windows process injection", 2)
+                return
+            # can fail ?
+            dirs = [x for x in self.get_data_files() if x[0] == 'pyrasite'][0]
+            srcfile = os.path.join(dirs[1], 'win', 'inject_python.cpp')
+            out32exe = os.path.join(dirs[2], 'win', 'inject_python_32.exe')
+            out64exe = os.path.join(dirs[2], 'win', 'inject_python_64.exe')
+            try:
+                os.makedirs(os.path.dirname(out32exe))
+            except:
+                pass
+            try:
+                winbuild.compile(srcfile, out32exe, 'x86')
+            except:
+                self.announce(
+                    "Could not find an x86 microsoft compiler for supporting injection to 32 bit python instances", 2)
+            try:
+                winbuild.compile(srcfile, out64exe, 'x64')
+            except:
+                self.announce(
+                    "Could not find an x64 microsoft compiler for supporting injection to 64 bit python instances", 2)
 
 
 setup(name='pyrasite',
@@ -75,7 +79,7 @@ setup(name='pyrasite',
           [console_scripts]
           pyrasite = pyrasite.main:main
           pyrasite-memory-viewer = pyrasite.tools.memory_viewer:main
-          pyrasite-shell = pyrasite.tools.shell:shell
+          pyrasite-shell = pyrasite.tools.shell:main
       """,
       classifiers=[
           'Development Status :: 4 - Beta',
