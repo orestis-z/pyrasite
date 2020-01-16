@@ -17,23 +17,14 @@
 
 import os
 import sys
+import argparse
+
 import pyrasite
 
 
-def shell():
+def shell(args):
     """Open a Python shell in a running process"""
-
-    usage = "Usage: pyrasite-shell <PID>"
-    if not len(sys.argv) == 2:
-        print(usage)
-        sys.exit(1)
-    try:
-        pid = int(sys.argv[1])
-    except ValueError:
-        print(usage)
-        sys.exit(1)
-
-    ipc = pyrasite.PyrasiteIPC(pid, 'ReversePythonShell',
+    ipc = pyrasite.PyrasiteIPC(args.pid, 'ReversePythonShell',
                                timeout=os.getenv('PYRASITE_IPC_TIMEOUT') or 5)
     ipc.connect()
 
@@ -47,6 +38,22 @@ def shell():
         import readline
     except ImportError:
         pass
+
+    if args.cmd:
+        try:
+            ipc.send(cmd)
+            payload = ipc.recv()
+            if payload is None:
+                ipc.close()
+                return
+            prompt, payload = payload.split('\n', 1)
+            if payload != '':
+                print(payload)
+        except:
+            print('')
+            raise
+        finally:
+            ipc.close()
 
     # py3k compat
     try:
@@ -79,5 +86,18 @@ def shell():
         ipc.close()
 
 
+def parse_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("PID", dest="pid", type=int)
+    parser.add_argument(
+        "-c",
+        "--cmd",
+        dest="cmd",
+        type=str
+    )
+    return parser.parse_args()
+
+
 if __name__ == '__main__':
-    shell()
+    args = parse_args()
+    shell(args)
